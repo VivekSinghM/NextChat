@@ -4,10 +4,10 @@ NextChat is a modern chat application built with Next.js, Supabase, and WebSocke
 
 ## Features
 
-- **Real-time Messaging**: Enjoy instant communication with other users through WebSockets.
-- **User Authentication**: Securely authenticate users with Supabase authentication.
-- **Persistent Storage**: Store chat messages and user data reliably using Supabase.
-- **Responsive Design**: Utilize Next.js for a responsive and mobile-friendly user interface.
+-   **Real-time Messaging**: Enjoy instant communication with other users through WebSockets.
+-   **User Authentication**: Securely authenticate users with Supabase authentication.
+-   **Persistent Storage**: Store chat messages and user data reliably using Supabase.
+-   **Responsive Design**: Utilize Next.js for a responsive and mobile-friendly user interface.
 
 ## Getting Started
 
@@ -15,28 +15,28 @@ Follow these instructions to get the project up and running on your local machin
 
 ### Prerequisites
 
-- Node.js (version >= 14.0.0)
-- npm (version >= 7.0.0) or yarn (version >= 1.22.0)
+-   Node.js (version >= 14.0.0)
+-   npm (version >= 7.0.0) or yarn (version >= 1.22.0)
 
 ### Installation
 
 1. Clone the repository:
 
-   ```bash
-   git clone https://github.com/your-username/NextChat.git
-   ```
+    ```bash
+    git clone https://github.com/your-username/NextChat.git
+    ```
 
 2. Navigate to the project directory:
 
-   ```bash
-   cd NextChat
-   ```
+    ```bash
+    cd NextChat
+    ```
 
 3. Install dependencies:
 
-   ```bash
-   yarn install
-   ```
+    ```bash
+    yarn install
+    ```
 
 Configuration
 Create a Supabase project and obtain the API URL and public key.
