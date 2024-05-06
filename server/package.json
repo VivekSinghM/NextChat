@@ -1,0 +1,28 @@
+{
+  "name": "socket-next-chat",
+  "version": "0.0.1",
+  "description": "my first socket.io app",
+  "scripts": {
+    "start": "tsc && node build/index.js --port 8080",
+    "dev": "nodemon --ext ts --exec 'bun start'"
+  },
+  "dependencies": {
+    "@types/body-parser": "^1.19.5",
+    "@types/multer": "^1.4.11",
+    "class-transformer": "^0.5.1",
+    "class-validator": "^0.14.1",
+    "dotenv": "^16.4.5",
+    "express": "^4.19.2",
+    "minimist": "^1.2.8",
+    "routing-controllers": "^0.10.4",
+    "socket.io": "^4.7.5"
+  },
+  "devDependencies": {
+    "@types/express": "^4.17.21",
+    "@types/node": "^20.12.8",
+    "nodemon": "^3.1.0",
+    "ts-node": "^10.9.2",
+    "tslint": "^6.1.3",
+    "typescript": "^5.4.5"
+  }
+}
