@@ -16,6 +16,7 @@
     "@nextui-org/kbd": "^2.0.28",
     "@nextui-org/link": "^2.0.29",
     "@nextui-org/navbar": "^2.0.30",
+    "@nextui-org/react": "^2.3.6",
     "@nextui-org/snippet": "^2.0.35",
     "@nextui-org/switch": "^2.0.28",
     "@nextui-org/system": "2.1.0",
@@ -29,6 +30,7 @@
     "next-themes": "^0.2.1",
     "react": "18.2.0",
     "react-dom": "18.2.0",
+    "socket.io-client": "^4.7.5",
     "tailwind-variants": "^0.1.20"
   },
   "devDependencies": {

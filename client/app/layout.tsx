@@ -3,7 +3,6 @@ import { Metadata, Viewport } from 'next';
 import { siteConfig } from '@/config/site';
 import { fontSans } from '@/config/fonts';
 import { Providers } from './providers';
-import { Navbar } from '@/components/navbar';
 import { Link } from '@nextui-org/link';
 import clsx from 'clsx';
 
@@ -44,7 +43,7 @@ export default function RootLayout({
                 >
                     <div className='relative flex h-screen flex-col'>
                         {/* <Navbar /> */}
-                        <main className='container mx-auto max-w-7xl flex-grow px-3 pt-8'>
+                        <main className='container mx-auto max-w-7xl flex-grow'>
                             {children}
                         </main>
                         <footer className='flex w-full items-center justify-center py-3'>

@@ -1,16 +1,34 @@
-import { Link } from '@nextui-org/link';
-import { Snippet } from '@nextui-org/snippet';
-import { Code } from '@nextui-org/code';
-import { button as buttonStyles } from '@nextui-org/theme';
-import { siteConfig } from '@/config/site';
-import { title, subtitle } from '@/components/primitives';
-import { GithubIcon } from '@/components/icons';
+'use client';
+
+import ChatWidget from '@/components/ChatWidget/ChatWidget';
+import ConversationWidget from '@/components/ConversationWidget/ConversationWidget';
+import ChatsProvider from '@/context/ChatProvider/ChatProvider';
+
+import ContactsProvider from '@/context/ContactProvider/ContactsProvider';
+import { io } from 'socket.io-client';
 
 export default function Home() {
+    // console.log('res');
+    // const socket = io('http://localhost:8080/test');
+    // socket.on('connect', () => {
+    //     console.log('connected with', socket.id);
+    //     socket.emit('new_connect');
+    // });
+
+    // socket.on('ping', (res) => {
+    //     console.log(res);
+    // });
+
+    // socket.on('response', (res) => {
+    //     console.log(res);
+    // });
+
+    // socket.on('disconnect', () => {
+    //     console.error('Ops, something went wrong');
+    // });
     return (
-        <section className='flex w-full flex-row gap-1 py-2'>
-            <div className='w-1/4 border-spacing-0 border'>contacts</div>
-            <div className='w-3/4 border-spacing-0 border'>chat</div>
+        <section className='flex h-full w-full flex-row gap-1 p-2'>
+            hi from NextChat
         </section>
     );
 }
