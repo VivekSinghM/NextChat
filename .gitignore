@@ -37,3 +37,4 @@
 # vscode
 .vscode
 */.vscode
+*/bun.lockb
