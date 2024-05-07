@@ -3,34 +3,36 @@ import React, { useState } from 'react';
 import Link from 'next/link';
 
 import { SubmitHandler, useForm } from 'react-hook-form';
-
 import { Button } from '@nextui-org/button';
-import { Card, CardBody, CardFooter, CardHeader } from '@nextui-org/card';
 import { Input } from '@nextui-org/input';
+import { Card, CardBody, CardFooter, CardHeader } from '@nextui-org/card';
 import { allPaths } from '@/utils/constant/paths';
 import { supabase } from '@/utils/supabase/client';
 
 type formInputsFields = {
     email: string;
     password: string;
+    confirmPassword: string;
 };
-
-const LoginPage = () => {
+const RegisterPage = () => {
     const [loading, setLoading] = useState(false);
     const {
         register,
         handleSubmit,
         formState: { errors },
+        getValues,
     } = useForm({
         defaultValues: {
             email: '',
             password: '',
+            confirmPassword: '',
         },
     });
     const onSubmit: SubmitHandler<formInputsFields> = (data) => {
         setLoading(true);
         supabase.auth
-            .signInWithPassword({
+            // @ts-ignore
+            .signUp({
                 email: data.email,
                 password: data.password,
             })
@@ -38,8 +40,11 @@ const LoginPage = () => {
                 if (error) {
                     console.log(error);
                 }
+            })
+            .finally(() => {
+                setLoading(false);
+                // reset();
             });
-        setLoading(false);
     };
 
     return (
@@ -51,7 +56,7 @@ const LoginPage = () => {
                 <Card className=''>
                     <CardHeader className='flex gap-3'>
                         <div className='flex flex-col'>
-                            <p className='text-md'>Login</p>
+                            <p className='text-md'>Register</p>
                             <p className='text-small text-default-300'>
                                 NextChat
                             </p>
@@ -75,10 +80,6 @@ const LoginPage = () => {
                                     message: 'Invalid email',
                                 },
                             })}
-                            errorMessage={
-                                errors.email ? errors.email.message : null
-                            }
-                            // helperText={String(errors?.email?.message || '')}
                         />
                         <Input
                             type='password'
@@ -97,9 +98,26 @@ const LoginPage = () => {
                                 //     "Password must contain at least 8 characters, including UPPER/lowercase, one number and special characters",
                                 // },
                             })}
-                            errorMessage={
-                                errors.password ? errors.password.message : null
-                            }
+                        />
+                        <Input
+                            type='password'
+                            variant={'bordered'}
+                            label='Password'
+                            placeholder='Enter your password'
+                            radius='sm'
+                            fullWidth
+                            labelPlacement='outside'
+                            {...register('confirmPassword', {
+                                required: 'Password is required',
+                                validate: (value) => {
+                                    {
+                                        return (
+                                            value === getValues().password ||
+                                            'The passwords do not match'
+                                        );
+                                    }
+                                },
+                            })}
                         />
                         <div className='flex flex-row justify-end'>
                             <Button size='sm' type='submit'>
@@ -109,9 +127,9 @@ const LoginPage = () => {
                     </CardBody>
                     <hr />
                     <CardFooter className=' text-small text-default-500'>
-                        {`Don't have an account`}&nbsp;
-                        <Link href={allPaths.register} className='underline'>
-                            {'Register'}
+                        {`Already have an account`}&nbsp;
+                        <Link href={allPaths.login} className='underline'>
+                            {'login'}
                         </Link>
                         .
                     </CardFooter>
@@ -121,4 +139,4 @@ const LoginPage = () => {
     );
 };
 
-export default LoginPage;
+export default RegisterPage;
