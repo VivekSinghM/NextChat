@@ -11,7 +11,11 @@ import { useRouter, usePathname } from 'next/navigation';
 import { supabase } from '@/utils/supabase/client';
 import { AuthChangeEvent } from '@supabase/supabase-js';
 
-import { DatabaseTable } from '@/types/customSchema';
+import {
+    DatabaseTable,
+    DatabaseTableInsert,
+    DatabaseTableUpdate,
+} from '@/types/customSchema';
 import { allPaths } from '@/utils/constant/paths';
 
 type AuthContextType = {
@@ -21,9 +25,16 @@ type AuthContextType = {
         id: string;
     } | null;
     handleUserUpdate: (
-        x: Omit<DatabaseTable['users'], 'public_id'> | null
+        x:
+            | {
+                  data: Omit<DatabaseTableInsert['users'], 'id' | 'public_id'>;
+                  op: 'create';
+              }
+            | {
+                  data: Omit<DatabaseTableUpdate['users'], 'id'>;
+                  op: 'update';
+              }
     ) => Promise<Boolean>;
-    // eslint-disable-next-line no-unused-vars
 };
 
 const AuthContext = createContext<AuthContextType | undefined>(undefined);
@@ -43,15 +54,35 @@ export const AuthProvider = ({ children }: { children: ReactNode }) => {
     }) => {
         if (id !== user?.id) {
             const userDetails = await getUserDetails(id);
+            console.log({ userDetails });
             setUser({ otherDetails: userDetails || null, id, email });
             loading && setLoading(false);
         }
     };
 
-    const handleUserUpdate: AuthContextType['handleUserUpdate'] = async (
-        data
-    ) => {
-        return false;
+    const handleUserUpdate: AuthContextType['handleUserUpdate'] = async ({
+        data,
+        op,
+    }) => {
+        return (
+            op === 'update'
+                ? createUpdateUser({
+                      data: {
+                          ...data,
+                          ...(op === 'update'
+                              ? { public_id: user.otherDetails.id }
+                              : {}),
+                      },
+                      op,
+                  })
+                : createUpdateUser({
+                      data,
+                      op,
+                  })
+        ).then((data) => {
+            setUser((pre) => ({ ...pre, otherDetails: data }));
+            return true;
+        });
     };
 
     useEffect(() => {
@@ -64,7 +95,6 @@ export const AuthProvider = ({ children }: { children: ReactNode }) => {
                     } else if (event !== 'USER_UPDATED') {
                         setUser(null);
                         loading && setLoading(false);
-                        // router.replace(allPaths.login);
                     }
                 }
             }
@@ -84,9 +114,13 @@ export const AuthProvider = ({ children }: { children: ReactNode }) => {
                 if (!user?.otherDetails) {
                     console.log(allPaths.onboarding);
                     router.replace(allPaths.onboarding);
+                } else {
+                    [
+                        allPaths.login,
+                        allPaths.register,
+                        allPaths.onboarding,
+                    ].includes(pathName) && router.replace(allPaths.dashboard);
                 }
-                [allPaths.login, allPaths.register].includes(pathName) &&
-                    router.replace(allPaths.dashboard);
             } else {
                 console.log(
                     user?.email,
@@ -123,21 +157,55 @@ export const useAuthContext = () => {
 };
 
 const getUserDetails = (id: string) => {
-    try {
-        return supabase
-            .from('users')
-            .select('id:public_id, first_name, last_name, image, about')
-            .eq('id', id)
-            .single()
-            .then(({ data, error }) => {
-                if (error) {
-                    console.error(error.message);
-                    throw new Error(error.message);
-                }
-                return data || null;
-            });
-    } catch (e) {
-        console.error(e);
-        return null;
-    }
+    return supabase
+        .from('users')
+        .select('id:public_id, first_name, last_name, image, about')
+        .eq('id', id)
+        .single()
+        .then(({ data, error }) => {
+            console.log({ error, data });
+
+            if (error) {
+                console.error(error.message);
+                // throw new Error(error.message);
+            }
+            return data || null;
+        });
+};
+
+const createUpdateUser = async ({
+    data,
+    op,
+}:
+    | {
+          data: Omit<DatabaseTableInsert['users'], 'id' | 'public_id'>;
+          op: 'create';
+      }
+    | {
+          data: Omit<DatabaseTableUpdate['users'], 'id'>;
+          op: 'update';
+      }) => {
+    return (
+        op === 'create'
+            ? supabase.from('users').insert({
+                  ...data,
+                  public_id: generateUserId(data.first_name),
+              })
+            : supabase
+                  .from('users')
+                  .update(data)
+                  .eq('public_id', data.public_id)
+    )
+        .select('id:public_id, first_name, last_name, image, about')
+        .single()
+        .then(({ data, error }) => {
+            if (error) throw new Error(error.message);
+            return data;
+        });
+};
+const generateUserId = (str: string) => {
+    const prefix = str.substring(0, 4);
+    const randomId = Math.floor(100000 + Math.random() * 900000);
+    // Return the concatenated result
+    return `${prefix}@${randomId}`;
 };
