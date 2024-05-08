@@ -131,7 +131,7 @@ export type Database = {
           about?: string | null
           created_at?: string
           first_name: string
-          id: string
+          id?: string
           image?: string | null
           last_name?: string | null
           public_id: string
