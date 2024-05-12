@@ -19,7 +19,6 @@ export type CustomEventsType<T extends CustomSocketEvents> = {
 };
 
 interface CustomSocketHandlerInterface<T extends CustomSocketEvents> {
-  eventEmitter: CustomEventsType<T>["eventEmitter"];
   bindEvents(socket: CustomSocketType<T>): void;
   handleConnection(socket: CustomSocketType<T>): void;
   middleware?(socket: CustomSocketType<T>, next: any): void;
