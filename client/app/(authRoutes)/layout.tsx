@@ -1,5 +1,4 @@
-import { AuthProvider } from '@/context/AuthProvider/AuthProvider';
-
+'use client';
 // export const metadata: Metadata = {
 //     title: {
 //         default: siteConfig.name,
@@ -11,10 +10,12 @@ import { AuthProvider } from '@/context/AuthProvider/AuthProvider';
 //     },
 // };
 
+import SocketProvider from '@/context/SocketProvider/SocketProvider';
+
 export default function RootLayout({
     children,
 }: {
     children: React.ReactNode;
 }) {
-    return <>{children}</>;
+    return <SocketProvider>{children}</SocketProvider>;
 }
