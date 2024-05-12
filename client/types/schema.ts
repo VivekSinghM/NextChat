@@ -117,6 +117,48 @@ export type Database = {
         }
         Relationships: []
       }
+      contacts: {
+        Row: {
+          alias: string | null
+          contact_id: string | null
+          created_at: string
+          id: number
+          is_fav: boolean
+          own_id: string
+        }
+        Insert: {
+          alias?: string | null
+          contact_id?: string | null
+          created_at?: string
+          id?: number
+          is_fav?: boolean
+          own_id: string
+        }
+        Update: {
+          alias?: string | null
+          contact_id?: string | null
+          created_at?: string
+          id?: number
+          is_fav?: boolean
+          own_id?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "contacts_contact_id_fkey"
+            columns: ["contact_id"]
+            isOneToOne: false
+            referencedRelation: "users"
+            referencedColumns: ["public_id"]
+          },
+          {
+            foreignKeyName: "contacts_own_id_fkey"
+            columns: ["own_id"]
+            isOneToOne: false
+            referencedRelation: "users"
+            referencedColumns: ["public_id"]
+          },
+        ]
+      }
       users: {
         Row: {
           about: string | null

@@ -7,7 +7,6 @@ import {
     useState,
 } from 'react';
 import { useRouter, usePathname } from 'next/navigation';
-
 import { supabase } from '@/utils/supabase/client';
 import { AuthChangeEvent } from '@supabase/supabase-js';
 
@@ -54,7 +53,6 @@ export const AuthProvider = ({ children }: { children: ReactNode }) => {
     }) => {
         if (id !== user?.id) {
             const userDetails = await getUserDetails(id);
-            console.log({ userDetails });
             setUser({ otherDetails: userDetails || null, id, email });
             loading && setLoading(false);
         }
@@ -109,10 +107,7 @@ export const AuthProvider = ({ children }: { children: ReactNode }) => {
         //   @ts-ignore
         if (!loading) {
             if (user?.email) {
-                console.log('hi');
-
                 if (!user?.otherDetails) {
-                    console.log(allPaths.onboarding);
                     router.replace(allPaths.onboarding);
                 } else {
                     [
@@ -122,12 +117,6 @@ export const AuthProvider = ({ children }: { children: ReactNode }) => {
                     ].includes(pathName) && router.replace(allPaths.dashboard);
                 }
             } else {
-                console.log(
-                    user?.email,
-                    pathName,
-                    [allPaths.login, allPaths.register].includes(pathName),
-                    user
-                );
                 ![allPaths.login, allPaths.register].includes(pathName) &&
                     router.replace(allPaths.login);
             }
@@ -163,8 +152,6 @@ const getUserDetails = (id: string) => {
         .eq('id', id)
         .single()
         .then(({ data, error }) => {
-            console.log({ error, data });
-
             if (error) {
                 console.error(error.message);
                 // throw new Error(error.message);

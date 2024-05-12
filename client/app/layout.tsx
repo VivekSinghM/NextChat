@@ -39,7 +39,7 @@ export default function RootLayout({
                 )}
             >
                 <Providers
-                    themeProps={{ attribute: 'class', defaultTheme: 'dark' }}
+                    themeProps={{ attribute: 'class', defaultTheme: 'light' }}
                 >
                     <div className='relative flex h-screen flex-col'>
                         {/* <Navbar /> */}
@@ -48,10 +48,10 @@ export default function RootLayout({
                         </main>
                         <footer className='flex w-full items-center justify-center py-3'>
                             <Link
-                                isExternal
+                                // isExternal
                                 className='flex items-center gap-1 text-current'
-                                href='https://nextui-docs-v2.vercel.app?utm_source=next-app-template'
-                                title='nextui.org homepage'
+                                href='#'
+                                title='Vß'
                             >
                                 <span className='text-default-600'>
                                     Powered by
