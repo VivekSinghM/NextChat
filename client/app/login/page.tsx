@@ -35,9 +35,8 @@ const LoginPage = () => {
                 password: data.password,
             })
             .then(({ error }) => {
-                if (error) {
-                    console.log(error);
-                }
+                // @ts-ignore
+                console.error(error.message);
             });
         setLoading(false);
     };
@@ -67,11 +66,12 @@ const LoginPage = () => {
                             labelPlacement='outside'
                             radius='sm'
                             fullWidth
-                            autoFocus
+                            // autoFocus
                             {...register('email', {
                                 required: 'Email is required',
                                 pattern: {
-                                    value: /^[\w-\.]+@([\w-]+\.)+[\w-]{2,4}$/,
+                                    // eslint-disable-next-line security/detect-unsafe-regex
+                                    value: /^[\w-.]+@([\w-]+\.)+[\w-]{2,4}$/,
                                     message: 'Invalid email',
                                 },
                             })}
