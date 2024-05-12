@@ -2,6 +2,7 @@
 import {
     ReactNode,
     createContext,
+    useCallback,
     useContext,
     useEffect,
     useState,
@@ -23,6 +24,7 @@ type AuthContextType = {
         email: string;
         id: string;
     } | null;
+    logout: () => void;
     handleUserUpdate: (
         x:
             | {
@@ -44,44 +46,54 @@ export const AuthProvider = ({ children }: { children: ReactNode }) => {
     const router = useRouter();
     const pathName = usePathname();
 
-    const setUserDetails = async ({
-        id,
-        email,
-    }: {
-        id: string;
-        email: string;
-    }) => {
-        if (id !== user?.id) {
-            const userDetails = await getUserDetails(id);
-            setUser({ otherDetails: userDetails || null, id, email });
-            loading && setLoading(false);
-        }
+    const setUserDetails = useCallback(
+        async ({ id, email }: { id: string; email: string }) => {
+            if (id !== user?.id) {
+                const userDetails = await getUserDetails(id);
+                setUser({ otherDetails: userDetails || null, id, email });
+                stopLoading();
+            }
+        },
+        // eslint-disable-next-line react-hooks/exhaustive-deps
+        [user?.id]
+    );
+
+    const stopLoading = () => {
+        loading && setTimeout(() => setLoading(false), 200);
     };
 
-    const handleUserUpdate: AuthContextType['handleUserUpdate'] = async ({
-        data,
-        op,
-    }) => {
-        return (
-            op === 'update'
-                ? createUpdateUser({
-                      data: {
-                          ...data,
-                          ...(op === 'update'
-                              ? { public_id: user.otherDetails.id }
-                              : {}),
-                      },
-                      op,
-                  })
-                : createUpdateUser({
-                      data,
-                      op,
-                  })
-        ).then((data) => {
-            setUser((pre) => ({ ...pre, otherDetails: data }));
-            return true;
+    const logout = useCallback(() => {
+        setLoading(true);
+        supabase.auth.signOut().then(({ error }) => {
+            if (!error) router.replace(allPaths.login);
+            stopLoading();
         });
-    };
+    }, []);
+
+    const handleUserUpdate: AuthContextType['handleUserUpdate'] = useCallback(
+        async ({ data, op }) => {
+            return (
+                op === 'update'
+                    ? createUpdateUser({
+                          data: {
+                              ...data,
+                              ...(op === 'update'
+                                  ? { public_id: user.otherDetails.id }
+                                  : {}),
+                          },
+                          op,
+                      })
+                    : createUpdateUser({
+                          data,
+                          op,
+                      })
+            ).then((data) => {
+                setUser((pre) => ({ ...pre, otherDetails: data }));
+                return true;
+            });
+        },
+        [user?.otherDetails?.id]
+    );
 
     useEffect(() => {
         const { data: listener } = supabase.auth.onAuthStateChange(
@@ -92,7 +104,7 @@ export const AuthProvider = ({ children }: { children: ReactNode }) => {
                         !user && setUserDetails({ id, email });
                     } else if (event !== 'USER_UPDATED') {
                         setUser(null);
-                        loading && setLoading(false);
+                        stopLoading();
                     }
                 }
             }
@@ -101,7 +113,7 @@ export const AuthProvider = ({ children }: { children: ReactNode }) => {
             listener.subscription.unsubscribe();
         };
         // eslint-disable-next-line react-hooks/exhaustive-deps
-    }, []);
+    }, [user?.id]);
 
     useEffect(() => {
         //   @ts-ignore
@@ -124,12 +136,19 @@ export const AuthProvider = ({ children }: { children: ReactNode }) => {
         // eslint-disable-next-line react-hooks/exhaustive-deps
     }, [user, pathName, loading]);
 
+    //// remove this console.log after debug
+    // useEffect(() => {
+    //     console.log('for debug render Auth');
+    // }, []);
+
     return (
         <>
             {loading ? (
                 'loading'
             ) : (
-                <AuthContext.Provider value={{ user, handleUserUpdate }}>
+                <AuthContext.Provider
+                    value={{ user, logout, handleUserUpdate }}
+                >
                     {children}
                 </AuthContext.Provider>
             )}
