@@ -5,17 +5,17 @@ import CustomSocketHandlerInterface, {
   CustomSocketType,
 } from "./types";
 import { supabase } from "../../supabase/client";
+import { subscribe, unSubscribe } from "./utils.socket";
 
 interface ChatSocketEvents extends CustomSocketEvents {
   ClientToServerEvents: {
     "send-message": (
       io,
       data: { message: string; to: string },
-      callback: Function,
-      ...x: any
+      callback: Function
     ) => void;
-    join: (io, room: string) => void;
-    leave: (io, room: string, ...x: any) => void;
+    subscribe: typeof subscribe;
+    unSubscribe: typeof unSubscribe;
   };
 }
 
@@ -49,15 +49,9 @@ export default class ChatHandler
           return callback(data);
         });
     },
-    join: (io: Socket, room) => {
-      io.join(room);
-      // io.data = { ...io.data, chat_id: room };
-    },
-    leave: (io: Socket, room) => {
-      io.leave(room);
-    },
+    subscribe,
+    unSubscribe,
   };
-
 
   bindEvents(socket: ChatSocketType): void {
     for (let [event, action] of Object.entries(this.eventListener) as {
@@ -66,7 +60,11 @@ export default class ChatHandler
         (typeof this.eventListener)[K]
       ];
     }[keyof typeof this.eventListener][])
-      socket.on(event, (props, callback) => action(socket, props, callback));
+      socket.on(event, (props, callback) => {
+        console.log("event", event, "props", props, "callback", callback);
+
+        return action(socket, props, callback);
+      });
   }
 
   handleConnection(socket: Socket): void {
