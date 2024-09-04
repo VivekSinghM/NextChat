@@ -14,13 +14,14 @@ import { allPaths } from '@/utils/constant/paths';
 export type contactType = {
     id: string;
     name: string;
-    image: string;
+    image: string | null;
     is_fav: boolean;
+    alias: string | null;
 };
 interface ConversationProviderInterface {
     contacts: contactType[];
     conversation: Awaited<ReturnType<typeof getConversations>>;
-    selectedConversation: this['conversation'][number];
+    selectedConversation: this['conversation'][number] | null;
     handleCreateUpdateContact: (
         x:
             | { data: { contact_id: string; is_fav }; type: 'create' }
@@ -150,26 +151,25 @@ export const useConversationsAndContacts = () => {
     return useContext(ConversationContext);
 };
 
-const getContacts = async (id: string) => {
-    return supabase
-        .from('contacts')
-        .select(
-            'is_fav, alias, users!contacts_contact_id_fkey(id:public_id,first_name,last_name,image)'
-        )
-        .eq('own_id', id)
-        .then(({ data, error }) => {
-            if (error) throw new Error(error.message);
-            return data.map((item) => ({
-                id: item.users.id,
-                name: `${item.users.first_name} ${item.users.last_name}`.trim(),
-                image: item.users.image,
-                is_fav: item.is_fav,
-                alias: item.alias,
-            }));
-        });
-};
+async function getContacts(id: string) {
+    return (
+        await supabase
+            .from('contacts')
+            .select(
+                'is_fav, alias, users!contacts_contact_id_fkey(id:public_id,first_name,last_name,image)'
+            )
+            .eq('own_id', id)
+            .throwOnError()
+    ).data!.map((item) => ({
+        id: item.users!.id,
+        name: `${item.users!.first_name} ${item.users!.last_name}`.trim(),
+        image: item.users!.image,
+        is_fav: item.is_fav,
+        alias: item.alias,
+    }));
+}
 
-const createUpdateContact = ({
+async function createUpdateContact({
     data,
     type,
 }:
@@ -180,31 +180,31 @@ const createUpdateContact = ({
               'own_id' | 'contact_id'
           > & { own_id: string; contact_id: string };
           type: 'update';
-      }) => {
-    return (
-        type === 'create'
-            ? supabase.from('contacts').insert(data)
-            : supabase
-                  .from('contacts')
-                  .update(data)
-                  .eq('own_id', data.own_id)
-                  .eq('contact_id', data.contact_id)
-    )
-        .select(
-            'is_fav, alias, users!contacts_contact_id_fkey(id:public_id,first_name,last_name,image)'
+      }) {
+    const item = (
+        await (
+            type === 'create'
+                ? supabase.from('contacts').insert(data)
+                : supabase
+                      .from('contacts')
+                      .update(data)
+                      .eq('own_id', data.own_id)
+                      .eq('contact_id', data.contact_id)
         )
-        .single()
-        .then(({ data, error }) => {
-            if (error) throw new Error(error.message);
-            return {
-                id: data.users.id,
-                name: `${data.users.first_name} ${data.users.last_name}`.trim(),
-                image: data.users.image,
-                is_fav: data.is_fav,
-                alias: data.alias,
-            };
-        });
-};
+            .select(
+                'is_fav, alias, users!contacts_contact_id_fkey(id:public_id,first_name,last_name,image)'
+            )
+            .single()
+            .throwOnError()
+    ).data!;
+    return {
+        id: item.users!.id,
+        name: `${item.users!.first_name} ${item.users!.last_name}`.trim(),
+        image: item.users!.image,
+        is_fav: item.is_fav,
+        alias: item.alias,
+    };
+}
 
 const getConversations = async (id: string) => {
     return supabase

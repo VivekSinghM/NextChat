@@ -1,6 +1,6 @@
 'use client';
 import {
-    ReactNode,
+    type ReactNode,
     createContext,
     useCallback,
     useContext,
@@ -9,7 +9,7 @@ import {
 } from 'react';
 import { useRouter, usePathname } from 'next/navigation';
 import { supabase } from '@/utils/supabase/client';
-import { AuthChangeEvent } from '@supabase/supabase-js';
+import type { AuthChangeEvent } from '@supabase/supabase-js';
 
 import {
     DatabaseTable,
@@ -23,7 +23,7 @@ type AuthContextType = {
         otherDetails: Omit<DatabaseTable['users'], 'public_id' | 'created_at'>;
         email: string;
         id: string;
-    } | null;
+    };
     logout: () => void;
     handleUserUpdate: (
         x:
@@ -41,7 +41,7 @@ type AuthContextType = {
 const AuthContext = createContext<AuthContextType | undefined>(undefined);
 
 export const AuthProvider = ({ children }: { children: ReactNode }) => {
-    const [user, setUser] = useState<AuthContextType['user']>(null);
+    const [user, setUser] = useState<AuthContextType['user'] | null>(null);
     const [loading, setLoading] = useState(true);
     const router = useRouter();
     const pathName = usePathname();
@@ -78,7 +78,7 @@ export const AuthProvider = ({ children }: { children: ReactNode }) => {
                           data: {
                               ...data,
                               ...(op === 'update'
-                                  ? { public_id: user.otherDetails.id }
+                                  ? { public_id: user!.otherDetails.id }
                                   : {}),
                           },
                           op,
@@ -88,7 +88,7 @@ export const AuthProvider = ({ children }: { children: ReactNode }) => {
                           op,
                       })
             ).then((data) => {
-                setUser((pre) => ({ ...pre, otherDetails: data }));
+                setUser((pre) => ({ ...pre!, otherDetails: data }));
                 return true;
             });
         },
@@ -147,7 +147,7 @@ export const AuthProvider = ({ children }: { children: ReactNode }) => {
                 'loading'
             ) : (
                 <AuthContext.Provider
-                    value={{ user, logout, handleUserUpdate }}
+                    value={{ user: user!, logout, handleUserUpdate }}
                 >
                     {children}
                 </AuthContext.Provider>
@@ -164,20 +164,16 @@ export const useAuthContext = () => {
     return context;
 };
 
-const getUserDetails = (id: string) => {
-    return supabase
-        .from('users')
-        .select('id:public_id, first_name, last_name, image, about')
-        .eq('id', id)
-        .single()
-        .then(({ data, error }) => {
-            if (error) {
-                console.error(error.message);
-                // throw new Error(error.message);
-            }
-            return data || null;
-        });
-};
+async function getUserDetails(id: string) {
+    return (
+        await supabase
+            .from('users')
+            .select('id:public_id, first_name, last_name, image, about')
+            .eq('id', id)
+            .single()
+            .throwOnError()
+    ).data!;
+}
 
 const createUpdateUser = async ({
     data,
@@ -200,7 +196,7 @@ const createUpdateUser = async ({
             : supabase
                   .from('users')
                   .update(data)
-                  .eq('public_id', data.public_id)
+                  .eq('public_id', data.public_id!)
     )
         .select('id:public_id, first_name, last_name, image, about')
         .single()

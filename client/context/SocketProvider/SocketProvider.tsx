@@ -1,15 +1,15 @@
 import React, {
-    ReactNode,
+    type ReactNode,
     createContext,
     useContext,
     useEffect,
     useState,
 } from 'react';
-import { Socket, io } from 'socket.io-client';
+import { type Socket, io } from 'socket.io-client';
 import { useAuthContext } from '../AuthProvider/AuthProvider';
 
 interface SocketProviderInterface {
-    chatIo: Socket;
+    chatIo: Socket | null;
 }
 const initialConversationProvider: SocketProviderInterface = {
     chatIo: null,
@@ -18,8 +18,8 @@ const SocketContext = createContext<SocketProviderInterface>(
     initialConversationProvider
 );
 
-const webSocketUrl = process.env.WEB_SOCKET_URL!;
-const chatNamespace = process.env.CHAT_NAMESPACE!;
+const webSocketUrl = process.env.NEXT_PUBLIC_WEB_SOCKET_URL;
+const chatNamespace = process.env.NEXT_PUBLIC_CHAT_NAMESPACE;
 
 if (!webSocketUrl || !chatNamespace) {
     throw new Error('Env variables webSocketUrl or chatNamespace not found!');
@@ -42,7 +42,7 @@ const SocketProvider = ({ children }: { children: ReactNode }) => {
             setChatIo(conIo);
         }
         return () => {
-            chatIo && chatIo.close();
+            chatIo?.close();
         };
     }, [user.otherDetails.id]);
     return (

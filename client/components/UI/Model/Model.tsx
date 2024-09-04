@@ -1,11 +1,11 @@
-import React, { ReactNode } from 'react';
+import React, { type ReactNode } from 'react';
 import {
     Modal as Next_Model,
     ModalBody,
     ModalContent,
     ModalFooter,
     ModalHeader,
-    ModalProps,
+    type ModalProps,
 } from '@nextui-org/react';
 
 const Model = ({
